@@ -4,6 +4,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegistroVendedorRequest extends FormRequest
 {
@@ -11,17 +12,28 @@ class RegistroVendedorRequest extends FormRequest
     {
         return true;
     }
-
+    
     public function rules(): array
     {
         return [
             'nombre_completo' => 'required|string|max:150',
             'email' => 'required|email|unique:solicitudes_vendedores,email|unique:usuarios,email|max:100',
             'password' => 'required|string|min:6|confirmed',
-            'sucursal_sugerida_id' => 'nullable|exists:sucursales,id'
+            
+            // Tipo de sucursal: 'nueva' o 'existente' (obligatorio)
+            'tipo_sucursal' => ['required', Rule::in(['nueva', 'existente'])],
+            
+            // Si es 'nueva', se requieren estos campos
+            'sucursal_nombre' => 'required_if:tipo_sucursal,nueva|string|max:100',
+            'sucursal_ciudad' => 'required_if:tipo_sucursal,nueva|string|max:100',
+            'sucursal_direccion' => 'nullable|string|max:200',
+            'sucursal_telefono' => 'nullable|string|max:20',
+            
+            // Si es 'existente', se requiere el ID de la sucursal
+            'sucursal_existente_id' => 'required_if:tipo_sucursal,existente|exists:sucursales,id'
         ];
     }
-
+    
     public function messages(): array
     {
         return [
@@ -32,7 +44,15 @@ class RegistroVendedorRequest extends FormRequest
             'password.required' => 'La contraseña es obligatoria',
             'password.min' => 'La contraseña debe tener al menos 6 caracteres',
             'password.confirmed' => 'Las contraseñas no coinciden',
-            'sucursal_sugerida_id.exists' => 'La sucursal seleccionada no existe'
+            
+            'tipo_sucursal.required' => 'Debes especificar si quieres crear una nueva sucursal o unirte a una existente',
+            'tipo_sucursal.in' => 'El tipo de sucursal debe ser "nueva" o "existente"',
+            
+            'sucursal_nombre.required_if' => 'Debes proporcionar un nombre para la nueva sucursal',
+            'sucursal_ciudad.required_if' => 'Debes proporcionar una ciudad para la nueva sucursal',
+            
+            'sucursal_existente_id.required_if' => 'Debes seleccionar una sucursal existente para unirte',
+            'sucursal_existente_id.exists' => 'La sucursal seleccionada no existe'
         ];
     }
 }
