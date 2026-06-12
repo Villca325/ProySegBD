@@ -54,6 +54,8 @@ export const useAuth = () => {
                     router.push('/admin/dashboard');
                 } else if (user.rol === 'vendedor') {
                     router.push('/dashboard');
+                } else if (user.rol === 'auditor') {
+                    router.push('/audit/dashboard');
                 } else if (user.rol === 'cliente') {
                     router.push('/productos');
                 } else {

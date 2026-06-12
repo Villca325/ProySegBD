@@ -140,7 +140,7 @@ class AuditoriaController extends Controller
         try {
             $user = $request->user();
 
-            if ($user->rol !== 'admin') {
+            if ($user->rol !== 'admin' && $user->rol !== 'auditor') {
                 return ApiResponse::forbidden('Solo administradores pueden exportar logs');
             }
 

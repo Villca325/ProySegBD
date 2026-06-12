@@ -175,9 +175,9 @@ export default function VendedorDashboardPage() {
                     ) : (
                         <div className="space-y-3">
                             {ventas.slice(0, 5).map((venta) => (
-                                <div key={venta.id} className="flex justify-between items-center border-b border-gray-200 pb-3">
+                                <div key={venta.venta_id} className="flex justify-between items-center border-b border-gray-200 pb-3">
                                     <div>
-                                        <p className="font-medium text-gray-900">Venta #{venta.id}</p>
+                                        <p className="font-medium text-gray-900">Venta #{venta.venta_id}</p>
                                         <p className="text-sm text-gray-500">
                                             {new Date(venta.fecha).toLocaleDateString()}
                                         </p>

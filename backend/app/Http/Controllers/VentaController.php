@@ -158,12 +158,12 @@ class VentaController extends Controller
     public function updateEstado(UpdateVentaEstadoRequest $request, $id)
     {
         try {
+            Log::info($request->estado);
                 DB::statement(
                     'CALL sp_actualizar_estado_venta(?, ?)',
                     [$id, $request->estado]
                 );
 
-                Log::info($request->estado);
                 
                 return ApiResponse::success([
                     'venta_id' => $id,

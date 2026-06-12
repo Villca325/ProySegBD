@@ -268,6 +268,31 @@ class ApiService {
         const response = await this.api.get('/public/sucursales');
         return response.data;
     }
+
+    async getAuditLogsByTable(tabla: string, params?: { page?: number }) {
+        const response = await this.api.get(`/audit/logs/table/${tabla}`, { params });
+        return response.data;
+    }
+
+    async getAuditLogsByUser(usuarioId: number, params?: { page?: number }) {
+        const response = await this.api.get(`/audit/logs/user/${usuarioId}`, { params });
+        return response.data;
+    }
+
+    async exportAuditLogs(params?: {
+        fecha_desde?: string;
+        fecha_hasta?: string;
+        tabla?: string;
+        operacion?: string;
+    }) {
+        const response = await this.api.get('/audit/exportar', { 
+            params,
+            responseType: 'blob' 
+        });
+        return response.data;
+    }
+
+     
 }
 
 export const api = new ApiService();
