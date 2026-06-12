@@ -88,7 +88,6 @@ class VentaController extends Controller
                         ->where('id', $id)
                         ->first();
 
-                    Log::info($venta);
                     break;
                     
                 case 'vendedor':
@@ -120,6 +119,7 @@ class VentaController extends Controller
             return ApiResponse::success($venta, 'Detalle de venta obtenido exitosamente');
 
         } catch (\Exception $e) {
+            Log::info("HPLA");
             return ApiResponse::error('Error al obtener detalle de venta: ' . $e->getMessage(), 500);
         }
     }
@@ -189,8 +189,8 @@ class VentaController extends Controller
                     $stats = DB::select('
                         SELECT
                             COUNT(*) as total_ventas,
-                            SUM(v.total) as total_facturado,
-                            AVG(v.total) as promedio_venta,
+                            SUM(v.venta_total) as total_facturado,
+                            AVG(v.venta_total) as promedio_venta,
                             COUNT(DISTINCT v.cliente_id) as clientes_unicos
                         FROM vista_mis_ventas v
                     ');

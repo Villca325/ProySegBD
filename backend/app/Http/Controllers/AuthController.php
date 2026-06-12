@@ -13,6 +13,7 @@ use App\Http\Requests\RegistroClienteRequest;
 use App\Http\Requests\RegistroVendedorRequest;
 use App\Http\Requests\LoginRequest;
 use App\Models\Sucursal;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -102,7 +103,7 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
         $solicitudId = DB::table('solicitudes_vendedores')->insertGetId([
             'nombre_completo' => $request->nombre_completo,
             'email' => $request->email,
-            'password' => bcrypt($request->password),
+            'password' => $request->password,
             'tipo_sucursal' => $request->tipo_sucursal,
             'sucursal_sugerida_id' => $sucursalExistenteId,
             'estado' => 'pendiente',
@@ -139,7 +140,8 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
             $usuario = Usuario::whereEmail($request->email)
                 ->where('activo', true)
                 ->first();
-
+            Log::info(!$usuario);
+            Log::info(!Hash::check($request->password, $usuario->password));
             if (!$usuario || !Hash::check($request->password, $usuario->password)) {
                 return ApiResponse::error('Credenciales inválidas o usuario inactivo', 401);
             }

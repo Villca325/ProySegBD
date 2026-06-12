@@ -37,6 +37,8 @@ class ProductoController extends Controller
 
             if ($request->has('activo')) {
                 $query->where('activo', $request->activo);
+            }else{
+                $query->where('activo',true);
             }
 
             $productos = $query->orderBy('id', 'desc')->paginate(20);
