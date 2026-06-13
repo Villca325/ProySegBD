@@ -44,7 +44,6 @@ Route::prefix('public')->group(function () {
             'data' => $sucursales
         ]);
     });
-    
 });
 
 // =====================================================
@@ -59,6 +58,7 @@ Route::middleware(['auth:sanctum', 'inyectarContext'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/cambiar-password', [AuthController::class, 'cambiarPassword']); 
     });
 
     // =====================================================

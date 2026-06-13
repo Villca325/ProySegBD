@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Usuario;
 use App\Services\DatabaseContextService;
 use App\Helpers\ApiResponse;
+use App\Http\Requests\CambioPasswordRequest;
 use App\Http\Requests\RegistroClienteRequest;
 use App\Http\Requests\RegistroVendedorRequest;
 use App\Http\Requests\LoginRequest;
@@ -227,5 +228,33 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
             'email' => $request->email,
             'existe' => $existe
         ]);
+    }
+
+
+    /**
+     * Cambiar contraseña del usuario autenticado
+     */
+    public function cambiarPassword(CambioPasswordRequest $request)
+    {
+        try {
+            $user = $request->user();
+            
+            // Verificar que la contraseña actual sea correcta
+            if (!Hash::check($request->current_password, $user->password)) {
+                return ApiResponse::error('La contraseña actual es incorrecta', 422);
+            }
+            
+            // Actualizar la contraseña
+            $user->password = $request->new_password;
+            $user->save();
+            
+            // Opcional: Revocar todos los tokens excepto el actual
+            // $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
+            
+            return ApiResponse::success(null, 'Contraseña actualizada exitosamente');
+            
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al cambiar contraseña: ' . $e->getMessage(), 500);
+        }
     }
 }

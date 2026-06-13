@@ -94,6 +94,15 @@ class ApiService {
         return response.data;
     }
 
+    async cambiarPassword(data: {
+        current_password: string;
+        new_password: string;
+        new_password_confirmation: string;
+    }) {
+        const response = await this.api.post('/auth/cambiar-password', data);
+        return response.data;
+    }
+
     // Productos
     async getProductos(params?: {
         page?: number;
