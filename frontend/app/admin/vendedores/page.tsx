@@ -32,7 +32,7 @@ export default function VendedoresPage() {
             
             const response = await api.getAdminVendedores(params);
             if (response.success) {
-                setVendedores(response.data.data);
+                setVendedores(response.data);
             }
         } catch (error) {
             console.error('Error fetching vendedores:', error);

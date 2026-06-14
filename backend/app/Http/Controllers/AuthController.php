@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+
     /**
      * Registro de cliente (registro público)
      */
@@ -141,10 +142,22 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
             $usuario = Usuario::whereEmail($request->email)
                 ->where('activo', true)
                 ->first();
-            Log::info(!$usuario);
-            Log::info(!Hash::check($request->password, $usuario->password));
-            if (!$usuario || !Hash::check($request->password, $usuario->password)) {
-                return ApiResponse::error('Credenciales inválidas o usuario inactivo', 401);
+                
+            if (!$usuario) {
+                return ApiResponse::error('Usuario o contraseña incorrectos', 401);
+            }
+
+            // if (!$usuario || !Hash::check($request->password, $usuario->password)) {
+            //     return ApiResponse::error('Credenciales inválidas o usuario inactivo', 401);
+            // }
+            // Verificar la contraseña
+            if (!Hash::check($request->password, $usuario->password)) {
+                return ApiResponse::error('Usuario o contraseña incorrectos', 401);
+            }
+
+            // Verificar si el usuario está activo
+            if (!$usuario->activo) {
+                return ApiResponse::error('Tu cuenta está desactivada. Contacta al administrador.', 401);
             }
 
             // Inyectar contexto de sesión (¡CRÍTICO para FGAC/RLS!)
@@ -170,7 +183,7 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
                 'session_context' => DatabaseContextService::getCurrentContext()
             ], 'Login exitoso');
         } catch (\Exception $e) {
-            return ApiResponse::error('Error en login: ' . $e->getMessage(), 500);
+            return ApiResponse::error('Error al iniciar sesión. Intenta nuevamente.', 500);
         }
     }
 
