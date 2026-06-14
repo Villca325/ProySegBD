@@ -300,13 +300,13 @@ SELECT
     sv.comentarios,
     -- Tiempo transcurrido desde la solicitud
     DATEDIFF(NOW(), sv.fecha_solicitud) AS dias_pendiente,
-    -- Indicador si es nueva o existente
+    -- Indicador si es una nueva sucursal o ya existente
     CASE 
         WHEN sv.tipo_sucursal = 'nueva' THEN 'Creará nueva sucursal'
         WHEN sv.tipo_sucursal = 'existente' THEN 'Se unirá a sucursal existente'
         ELSE 'No especificado'
     END AS tipo_sucursal_descripcion,
-    -- Estado en español
+    -- Estado de la solicitud
     CASE 
         WHEN sv.estado = 'pendiente' THEN 'Pendiente de revisión'
         WHEN sv.estado = 'aprobada' THEN 'Aprobada'
@@ -906,7 +906,7 @@ INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecn
 -- Insertar logs para el contenido reproducible 
 
 -- =====================================================
--- LOGS DE VENTAS
+-- LOGS
 -- =====================================================
 
 -- Inserciones de ventas
@@ -944,9 +944,6 @@ INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecn
  JSON_OBJECT('id', 4, 'estado', 'cancelado'),
  '2024-06-14 14:00:00');
 
--- =====================================================
--- LOGS DE USUARIOS
--- =====================================================
 
 -- Inserciones de usuarios
 INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecnico, ip_address, datos_despues, fecha) VALUES
@@ -968,10 +965,6 @@ INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecn
  JSON_OBJECT('id', 3, 'rol', 'vendedor', 'activo', true, 'sucursal_id', 1),
  '2024-06-13 11:30:00');
 
--- =====================================================
--- LOGS DE SUCURSALES
--- =====================================================
-
 -- Inserciones de sucursales
 INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecnico, ip_address, datos_despues, fecha) VALUES
 ('sucursales', 'INSERT', 7, 'app_ecommerce@localhost', '192.168.1.200',
@@ -992,20 +985,13 @@ INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecn
  JSON_OBJECT('id', 5, 'activa', true),
  '2024-06-17 10:00:00');
 
--- =====================================================
--- LOGS DE SOLICITUDES DE VENDEDORES
--- =====================================================
 
 INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecnico, ip_address, datos_despues, fecha) VALUES
 ('solicitudes_vendedores', 'INSERT', 5, 'app_ecommerce@localhost', '192.168.1.102',
  JSON_OBJECT('id', 1, 'nombre_completo', 'Solicitante Test', 'email', 'test@test.com', 'estado', 'pendiente'),
  '2024-06-18 08:00:00');
 
--- =====================================================
--- LOGS ADICIONALES PARA DEMOSTRAR ACTIVIDAD
--- =====================================================
 
--- Más logs de productos recientes
 INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecnico, ip_address, datos_despues, fecha) VALUES
 ('productos', 'INSERT', 3, 'app_ecommerce@localhost', '192.168.1.100', 
  JSON_OBJECT('id', 10, 'nombre', 'Teclado Mecánico RGB', 'precio', 180.00, 'stock', 25, 'vendedor_id', 3, 'sucursal_id', 1),
@@ -1014,7 +1000,7 @@ INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecn
  JSON_OBJECT('id', 11, 'nombre', 'Mouse Gaming', 'precio', 85.00, 'stock', 40, 'vendedor_id', 4, 'sucursal_id', 2),
  DATE_SUB(NOW(), INTERVAL 1 DAY));
 
--- Actualizaciones recientes
+-- Actualizaciones 
 INSERT INTO audit_logs (tabla_afectada, operacion, usuario_real_id, usuario_tecnico, ip_address, datos_antes, datos_despues, fecha) VALUES
 ('productos', 'UPDATE', 3, 'app_ecommerce@localhost', '192.168.1.100',
  JSON_OBJECT('id', 10, 'precio', 180.00, 'stock', 25),
