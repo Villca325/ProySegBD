@@ -273,32 +273,7 @@ CREATE TABLE audit_logs (
     INDEX idx_fecha (fecha)
 );
 
--- =====================================================
--- 4. VARIABLES DE SESIÓN Y FUNCIONES PARA VISTAS
--- =====================================================
 
--- Las variables se inyectan desde Laravel al iniciar sesión
--- SET @app_user_id = ?;
--- SET @app_user_role = ?;
--- SET @app_user_sucursal_id = ?;
-
--- Función para obtener el ID del usuario autenticado
-CREATE FUNCTION get_app_user_id()
-RETURNS INT
-DETERMINISTIC
-RETURN @app_user_id;
-
--- Función para obtener el rol del usuario autenticado
-CREATE FUNCTION get_app_user_role()
-RETURNS VARCHAR(20)
-DETERMINISTIC
-RETURN @app_user_role;
-
--- Función para obtener la sucursal del usuario autenticado
-CREATE FUNCTION get_app_user_sucursal_id()
-RETURNS INT
-DETERMINISTIC
-RETURN @app_user_sucursal_id;
 
 -- =====================================================
 -- 5. VISTAS PARA FILTRADO HORIZONTAL (FGAC/RLS)
@@ -545,9 +520,25 @@ FROM solicitudes_vendedores sv
 LEFT JOIN sucursales s ON sv.sucursal_sugerida_id = s.id
 WHERE sv.email = (SELECT email FROM usuarios WHERE id = get_app_user_id());
 
--- =====================================================
--- 6. PROCEDIMIENTOS ALMACENADOS
--- =====================================================
+
+-- funciones para obtener las variables de sesion
+-- Función para obtener el ID del usuario autenticado
+CREATE FUNCTION get_app_user_id()
+RETURNS INT
+DETERMINISTIC
+RETURN @app_user_id;
+
+-- Función para obtener el rol del usuario autenticado
+CREATE FUNCTION get_app_user_role()
+RETURNS VARCHAR(20)
+DETERMINISTIC
+RETURN @app_user_role;
+
+-- Función para obtener la sucursal del usuario autenticado
+CREATE FUNCTION get_app_user_sucursal_id()
+RETURNS INT
+DETERMINISTIC
+RETURN @app_user_sucursal_id;
 
 DELIMITER //
 

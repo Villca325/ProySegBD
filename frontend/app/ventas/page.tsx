@@ -170,12 +170,12 @@ export default function VentasPage() {
                 ) : (
                     <div className="space-y-4">
                         {ventas.map((venta) => (
-                            <div key={venta?.venta_id || venta.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                            <div key={venta?.venta_id || ventas.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                                 <div className="p-6">
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
                                             <p className="text-sm text-gray-500">
-                                                Venta #{venta?.venta_id || venta.id}
+                                                Venta #{venta?.venta_id || ventas.id}
                                             </p>
                                             <p className="text-sm text-gray-500">
                                                 {format(new Date(venta.fecha), "dd 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}
@@ -189,7 +189,7 @@ export default function VentasPage() {
                                             {puedeActualizarEstado() && (
                                                 <select
                                                     value={venta.estado}
-                                                    onChange={(e) => handleActualizarEstado(venta?.venta_id || venta.id, e.target.value)}
+                                                    onChange={(e) => handleActualizarEstado(venta?.venta_id || ventas.id, e.target.value)}
                                                     className="ml-2 px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 >
                                                     <option value="pendiente">Pendiente</option>
@@ -245,7 +245,7 @@ export default function VentasPage() {
                     <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold">Detalle de Venta # {selectedVenta?.venta_id || venta.id}</h2>
+                                <h2 className="text-2xl font-bold">Detalle de Venta # {selectedVenta?.venta_id || ventas.id}</h2>
                                 <button
                                     onClick={() => setShowModal(false)}
                                     className="text-gray-400 hover:text-gray-600"

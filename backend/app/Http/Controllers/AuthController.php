@@ -19,9 +19,6 @@ use Illuminate\Support\Facades\Log;
 class AuthController extends Controller
 {
 
-    /**
-     * Registro de cliente (registro público)
-     */
     public function registroCliente(RegistroClienteRequest $request)
     {
         try {
@@ -47,90 +44,81 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Solicitud de registro de vendedor (requiere aprobación)
-     * El vendedor debe elegir: crear nueva sucursal O unirse a una existente
-     */
-    /**
- * Solicitud de registro de vendedor (requiere aprobación)
- * El vendedor debe elegir: crear nueva sucursal O unirse a una existente
- */
-public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
-{
-    try {
-        $sucursalExistenteId = null;
-        $sucursal = null;
-        $mensajeSucursal = '';
-        
-        if ($request->tipo_sucursal === 'existente') {
-            // Unirse a sucursal existente (debe estar activa)
-            $sucursalExistenteId = $request->sucursal_existente_id;
-            $sucursal = Sucursal::find($sucursalExistenteId);
-            
-            if (!$sucursal) {
-                return ApiResponse::error('La sucursal seleccionada no existe', 422);
+    public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
+    {
+        try {
+            $sucursalExistenteId = null;
+            $sucursal = null;
+            $mensajeSucursal = '';
+
+            if ($request->tipo_sucursal === 'existente') {
+                // Unirse a sucursal existente (debe estar activa)
+                $sucursalExistenteId = $request->sucursal_existente_id;
+                $sucursal = Sucursal::find($sucursalExistenteId);
+
+                if (!$sucursal) {
+                    return ApiResponse::error('La sucursal seleccionada no existe', 422);
+                }
+
+                if (!$sucursal->activa) {
+                    return ApiResponse::error('La sucursal seleccionada no está activa', 422);
+                }
+
+                $mensajeSucursal = "Se te asignará a la sucursal '{$sucursal->nombre}' en {$sucursal->ciudad}";
+            } else {
+                // Crear nueva sucursal (se crea INACTIVA)
+                $sucursal = Sucursal::create([
+                    'nombre' => $request->sucursal_nombre,
+                    'ciudad' => $request->sucursal_ciudad,
+                    'direccion' => $request->sucursal_direccion,
+                    'telefono' => $request->sucursal_telefono,
+                    'activa' => false,  // La sucursal se crea inactiva
+                    'created_at' => now()
+                ]);
+
+                $sucursalExistenteId = $sucursal->id;
+                $mensajeSucursal = "Se creará la nueva sucursal '{$sucursal->nombre}' en {$sucursal->ciudad} (pendiente de activación por administrador)";
             }
-            
-            if (!$sucursal->activa) {
-                return ApiResponse::error('La sucursal seleccionada no está activa', 422);
+
+            // Verificar si ya existe una solicitud pendiente para este email
+            $solicitudExistente = DB::table('solicitudes_vendedores')
+                ->where('email', $request->email)
+                ->where('estado', 'pendiente')
+                ->exists();
+
+            if ($solicitudExistente) {
+                return ApiResponse::error('Ya tienes una solicitud pendiente. Espera a que sea revisada.', 422);
             }
-            
-            $mensajeSucursal = "Se te asignará a la sucursal '{$sucursal->nombre}' en {$sucursal->ciudad}";
-        } else {
-            // Crear nueva sucursal (se crea INACTIVA)
-            $sucursal = Sucursal::create([
-                'nombre' => $request->sucursal_nombre,
-                'ciudad' => $request->sucursal_ciudad,
-                'direccion' => $request->sucursal_direccion,
-                'telefono' => $request->sucursal_telefono,
-                'activa' => false,  // La sucursal se crea inactiva
-                'created_at' => now()
+
+            // Insertar en tabla de solicitudes
+            $solicitudId = DB::table('solicitudes_vendedores')->insertGetId([
+                'nombre_completo' => $request->nombre_completo,
+                'email' => $request->email,
+                'password' => $request->password,
+                'tipo_sucursal' => $request->tipo_sucursal,
+                'sucursal_sugerida_id' => $sucursalExistenteId,
+                'estado' => 'pendiente',
+                'fecha_solicitud' => now()
             ]);
-            
-            $sucursalExistenteId = $sucursal->id;
-            $mensajeSucursal = "Se creará la nueva sucursal '{$sucursal->nombre}' en {$sucursal->ciudad} (pendiente de activación por administrador)";
+
+            $mensaje = "Tu solicitud ha sido enviada. {$mensajeSucursal}. Un administrador revisará tu solicitud.";
+
+            return ApiResponse::success([
+                'solicitud_id' => $solicitudId,
+                'estado' => 'pendiente',
+                'tipo_sucursal' => $request->tipo_sucursal,
+                'sucursal' => [
+                    'id' => $sucursal->id,
+                    'nombre' => $sucursal->nombre,
+                    'ciudad' => $sucursal->ciudad,
+                    'activa' => $sucursal->activa
+                ],
+                'mensaje' => $mensaje
+            ], 'Solicitud de registro de vendedor enviada exitosamente', 201);
+        } catch (\Exception $e) {
+            return ApiResponse::error('Error al enviar solicitud: ' . $e->getMessage(), 500);
         }
-        
-        // Verificar si ya existe una solicitud pendiente para este email
-        $solicitudExistente = DB::table('solicitudes_vendedores')
-            ->where('email', $request->email)
-            ->where('estado', 'pendiente')
-            ->exists();
-        
-        if ($solicitudExistente) {
-            return ApiResponse::error('Ya tienes una solicitud pendiente. Espera a que sea revisada.', 422);
-        }
-        
-        // Insertar en tabla de solicitudes
-        $solicitudId = DB::table('solicitudes_vendedores')->insertGetId([
-            'nombre_completo' => $request->nombre_completo,
-            'email' => $request->email,
-            'password' => $request->password,
-            'tipo_sucursal' => $request->tipo_sucursal,
-            'sucursal_sugerida_id' => $sucursalExistenteId,
-            'estado' => 'pendiente',
-            'fecha_solicitud' => now()
-        ]);
-        
-        $mensaje = "Tu solicitud ha sido enviada. {$mensajeSucursal}. Un administrador revisará tu solicitud.";
-        
-        return ApiResponse::success([
-            'solicitud_id' => $solicitudId,
-            'estado' => 'pendiente',
-            'tipo_sucursal' => $request->tipo_sucursal,
-            'sucursal' => [
-                'id' => $sucursal->id,
-                'nombre' => $sucursal->nombre,
-                'ciudad' => $sucursal->ciudad,
-                'activa' => $sucursal->activa
-            ],
-            'mensaje' => $mensaje
-        ], 'Solicitud de registro de vendedor enviada exitosamente', 201);
-        
-    } catch (\Exception $e) {
-        return ApiResponse::error('Error al enviar solicitud: ' . $e->getMessage(), 500);
     }
-}
 
     /**
      * Login de usuarios
@@ -138,18 +126,15 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
     public function login(LoginRequest $request)
     {
         try {
-            // Buscar usuario por email
             $usuario = Usuario::whereEmail($request->email)
                 ->where('activo', true)
                 ->first();
-                
+
             if (!$usuario) {
                 return ApiResponse::error('Usuario o contraseña incorrectos', 401);
             }
 
-            // if (!$usuario || !Hash::check($request->password, $usuario->password)) {
-            //     return ApiResponse::error('Credenciales inválidas o usuario inactivo', 401);
-            // }
+
             // Verificar la contraseña
             if (!Hash::check($request->password, $usuario->password)) {
                 return ApiResponse::error('Usuario o contraseña incorrectos', 401);
@@ -160,7 +145,7 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
                 return ApiResponse::error('Tu cuenta está desactivada. Contacta al administrador.', 401);
             }
 
-            // Inyectar contexto de sesión (¡CRÍTICO para FGAC/RLS!)
+            // Inyectar contexto de sesión
             DatabaseContextService::injectContext($usuario);
 
             // Eliminar tokens anteriores
@@ -186,14 +171,10 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
             return ApiResponse::error('Error al iniciar sesión. Intenta nuevamente.', 500);
         }
     }
-
-    /**
-     * Logout - limpiar contexto de sesión
-     */
     public function logout(Request $request)
     {
         try {
-            // Limpiar contexto de sesión en BD (¡CRÍTICO para evitar fugas!)
+            // Limpiar contexto de sesión en BD
             DatabaseContextService::clearContext();
 
             // Revocar token actual
@@ -251,21 +232,20 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
     {
         try {
             $user = $request->user();
-            
+
             // Verificar que la contraseña actual sea correcta
             if (!Hash::check($request->current_password, $user->password)) {
                 return ApiResponse::error('La contraseña actual es incorrecta', 422);
             }
-            
+
             // Actualizar la contraseña
             $user->password = $request->new_password;
             $user->save();
-            
+
             // Opcional: Revocar todos los tokens excepto el actual
             // $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
-            
+
             return ApiResponse::success(null, 'Contraseña actualizada exitosamente');
-            
         } catch (\Exception $e) {
             return ApiResponse::error('Error al cambiar contraseña: ' . $e->getMessage(), 500);
         }
