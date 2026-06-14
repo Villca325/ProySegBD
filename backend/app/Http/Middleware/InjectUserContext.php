@@ -21,7 +21,6 @@ class InjectUserContext
         // Log::info($request);
         if ($user) {
             // Inyectar variables de sesión en MySQL
-            // Esta es la solución a la "amnesia de identidad"
             DatabaseContextService::injectContext($user);
         } else {
             // Limpiar contexto si no hay usuario
