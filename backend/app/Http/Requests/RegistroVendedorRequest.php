@@ -20,17 +20,14 @@ class RegistroVendedorRequest extends FormRequest
             'email' => 'required|email|unique:solicitudes_vendedores,email|unique:usuarios,email|max:100',
             'password' => 'required|string|min:6|confirmed',
             
-            // Tipo de sucursal: 'nueva' o 'existente' (obligatorio)
-            'tipo_sucursal' => ['required', Rule::in(['nueva', 'existente'])],
+            'tipo_sucursal' => 'required|in:nueva,existente',
             
-            // Si es 'nueva', se requieren estos campos
             'sucursal_nombre' => 'required_if:tipo_sucursal,nueva|string|max:100',
             'sucursal_ciudad' => 'required_if:tipo_sucursal,nueva|string|max:100',
             'sucursal_direccion' => 'nullable|string|max:200',
             'sucursal_telefono' => 'nullable|string|max:20',
             
-            // Si es 'existente', se requiere el ID de la sucursal
-            'sucursal_existente_id' => 'required_if:tipo_sucursal,existente|exists:sucursales,id'
+            'sucursal_sugerida_id' => 'required_if:tipo_sucursal,existente|exists:sucursales,id',
         ];
     }
     

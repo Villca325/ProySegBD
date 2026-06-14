@@ -14,10 +14,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const initAuth = async () => {
             setLoading(true);
             try {
-                // Primero intentar obtener token de cookies (más seguro)
                 let token = Cookies.get('auth_token');
                 
-                // Si no hay token en cookies, intentar de localStorage
                 if (!token) {
                     const stored = localStorage.getItem('auth-storage');
                     if (stored) {
@@ -28,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                             }
                         } catch (e) {
                             console.error('Error parsing localStorage:', e);
-                            // Si hay error, limpiar localStorage corrupto
                             localStorage.removeItem('auth-storage');
                         }
                     }
@@ -40,7 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     if (response.success) {
                         setUser(response.data.user);
                     } else {
-                        // Token inválido, limpiar
                         logout();
                         Cookies.remove('auth_token');
                         localStorage.removeItem('auth-storage');
@@ -48,7 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
             } catch (error) {
                 console.error('Auth initialization error:', error);
-                // Limpiar datos corruptos
                 localStorage.removeItem('auth-storage');
                 Cookies.remove('auth_token');
             } finally {

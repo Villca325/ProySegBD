@@ -42,7 +42,6 @@ export default function AuditReportesPage() {
             if (response.success) {
                 const logs = response.data.data;
                 
-                // Procesar datos para estadísticas
                 const operacionesPorDia = logs.reduce((acc: any, log: any) => {
                     const fecha = format(new Date(log.fecha), 'yyyy-MM-dd');
                     if (!acc[fecha]) {

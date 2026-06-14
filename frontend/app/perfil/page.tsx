@@ -40,18 +40,15 @@ export default function PerfilPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
     
-    // State para mostrar/ocultar contraseñas
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     
-    // Formulario de edición
     const [editForm, setEditForm] = useState({
         nombre_completo: '',
         email: ''
     });
     
-    // Formulario de cambio de contraseña
     const [passwordForm, setPasswordForm] = useState({
         current_password: '',
         new_password: '',
@@ -76,7 +73,6 @@ export default function PerfilPage() {
                     email: response.data.user.email
                 });
                 
-                // Obtener información de la sucursal si el usuario tiene una
                 if (response.data.user.sucursal_id) {
                     try {
                         const sucursalesResponse = await api.getAdminSucursales();
@@ -104,7 +100,6 @@ export default function PerfilPage() {
         setSubmitting(true);
         setErrors({});
         
-        // Validación básica
         const newErrors: Record<string, string> = {};
         if (!editForm.nombre_completo.trim()) {
             newErrors.nombre_completo = 'El nombre completo es requerido';
@@ -122,7 +117,6 @@ export default function PerfilPage() {
         }
         
         try {
-            // Nota: El backend debe tener un endpoint para actualizar perfil
             if (perfil) {
                 setPerfil({
                     ...perfil,

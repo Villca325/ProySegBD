@@ -141,7 +141,6 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
                 return ApiResponse::error('Usuario o contraseña incorrectos', 401);
             }
 
-            // Inyectar contexto de sesión para RLS (Row Level Security)
             DatabaseContextService::injectContext($usuario);
 
             $usuario->tokens()->delete();
@@ -172,7 +171,6 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
     public function logout(Request $request)
     {
         try {
-            // Limpiar contexto de sesión en BD para RLS (Row Level Security)
             DatabaseContextService::clearContext();
 
             $request->user()->currentAccessToken()->delete();

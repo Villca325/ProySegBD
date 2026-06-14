@@ -10,8 +10,7 @@ class ProductoRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
-        // Solo vendedores, admin o gerentes pueden crear/modificar productos
-        return $user && in_array($user->rol, ['vendedor', 'admin', 'gerente']);
+        return in_array($user->rol, ['vendedor', 'admin', 'gerente']);
     }
 
     public function rules(): array

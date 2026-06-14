@@ -14,7 +14,6 @@ class ApiService {
             },
         });
 
-        // Interceptor para agregar token
         this.api.interceptors.request.use(
             (config: InternalAxiosRequestConfig) => {
                 const token = Cookies.get('auth_token');
@@ -28,12 +27,10 @@ class ApiService {
             }
         );
 
-        // Interceptor para manejar errores
         this.api.interceptors.response.use(
             (response) => response,
             (error) => {
                 if (error.response?.status === 401) {
-                    // Token expirado o inválido
                     Cookies.remove('auth_token');
                     Cookies.remove('user');
                     window.location.href = '/login';

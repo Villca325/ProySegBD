@@ -36,7 +36,6 @@ export function PagoModal({ isOpen, onClose, ventaId, total, onPagoExitoso }: Pa
         e.preventDefault();
         setIsProcessing(true);
 
-        // Simular procesamiento de pago
         setTimeout(() => {
             setIsProcessing(false);
             toast.success('¡Pago realizado exitosamente!');

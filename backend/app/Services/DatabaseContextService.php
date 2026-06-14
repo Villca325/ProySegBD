@@ -18,7 +18,6 @@ class DatabaseContextService
         DB::statement('SET @app_user_id = ?', [$user->id]);
         DB::statement('SET @app_user_role = ?', [$user->rol]);
         DB::statement('SET @app_user_sucursal_id = ?', [$user->sucursal_id]);
-        // Log::info(DB::select('select @app_user_role'));
         }
 
     /**

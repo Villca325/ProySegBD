@@ -16,10 +16,8 @@ class AuditoriaController extends Controller
     public function index(Request $request)
     {
         try {
-            // Usar la vista que filtra automáticamente
             $query = DB::table('vista_audit_logs');
 
-            // Filtros opcionales
             if ($request->has('tabla')) {
                 $query->where('tabla_afectada', $request->tabla);
             }
@@ -149,7 +147,6 @@ class AuditoriaController extends Controller
                 ->limit(10000)
                 ->get();
 
-            // Convertir a CSV
             $csv = "ID,Tabla,Operación,Usuario,IP,Fecha,Datos Antes,Datos Después\n";
 
             foreach ($logs as $log) {
