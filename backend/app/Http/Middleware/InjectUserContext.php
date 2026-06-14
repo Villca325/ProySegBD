@@ -16,14 +16,11 @@ class InjectUserContext
      */
     public function handle(Request $request, Closure $next)
     {
-        // Obtener usuario autenticado desde Sanctum
         $user = $request->user();
-        // Log::info($request);
+        
         if ($user) {
-            // Inyectar variables de sesión en MySQL
             DatabaseContextService::injectContext($user);
         } else {
-            // Limpiar contexto si no hay usuario
             DatabaseContextService::clearContext();
         }
 
@@ -35,8 +32,6 @@ class InjectUserContext
      */
     public function terminate(Request $request, $response): void
     {
-        // Limpiar contexto al finalizar la request
-        // Esto es importante para evitar fugas de información
         DatabaseContextService::clearContext();
     }
 }

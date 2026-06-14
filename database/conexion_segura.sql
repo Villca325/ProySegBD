@@ -39,22 +39,7 @@ GRANT SELECT ON ecommerce_seguro.sucursales TO 'auditor_federado_ssl'@'%';
 FLUSH PRIVILEGES;
 
 -- Crear usuario con SSL obligatorio
-CREATE USER IF NOT EXIST-- Crear usuario con SSL obligatorio
 CREATE USER IF NOT EXISTS 'auditor_federado_ssl'@'%' 
-IDENTIFIED BY 'ClaveSegura123!'
-REQUIRE SSL;
-
--- Otorgar los mismos permisos
-GRANT SELECT ON ecommerce_seguro.audit_logs TO 'auditor_federado_ssl'@'%';
-GRANT SELECT ON ecommerce_seguro.audit_seguridad TO 'auditor_federado_ssl'@'%';
-GRANT SELECT ON ecommerce_seguro.vista_audit_logs TO 'auditor_federado_ssl'@'%';
-GRANT SELECT (id, nombre_completo, email, rol, activo, created_at) 
-ON ecommerce_seguro.usuarios TO 'auditor_federado_ssl'@'%';
-GRANT SELECT ON ecommerce_seguro.ventas TO 'auditor_federado_ssl'@'%';
-GRANT SELECT ON ecommerce_seguro.productos TO 'auditor_federado_ssl'@'%';
-GRANT SELECT ON ecommerce_seguro.sucursales TO 'auditor_federado_ssl'@'%';
-
-FLUSH PRIVILEGES;S 'auditor_federado_ssl'@'%' 
 IDENTIFIED BY 'ClaveSegura123!'
 REQUIRE SSL;
 

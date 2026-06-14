@@ -65,7 +65,6 @@ class AdminController extends Controller
                     'sv.comentarios'
                 );
 
-            // Filtros
             if ($request->has('estado') && in_array($request->estado, ['pendiente', 'aprobada', 'rechazada'])) {
                 $query->where('sv.estado', $request->estado);
             }
@@ -121,12 +120,10 @@ class AdminController extends Controller
     public function aprobarVendedor(Request $request, $solicitudId)
     {
         try {
-            // Validar comentario opcional
             $request->validate([
                 'comentarios' => 'nullable|string|max:500'
             ]);
 
-            // Obtener solicitud
             $solicitud = DB::table('solicitudes_vendedores')
                 ->where('id', $solicitudId)
                 ->where('estado', 'pendiente')
@@ -144,7 +141,6 @@ class AdminController extends Controller
                 return ApiResponse::error('La sucursal asociada a la solicitud no existe', 422);
             }
 
-            // Si es gerente, verificar que la sucursal le pertenece
             if ($user->rol === 'gerente') {
                 if ($solicitud->tipo_sucursal === 'existente' && $sucursalId != $user->sucursal_id) {
                     return ApiResponse::forbidden('No puedes aprobar esta solicitud porque la sucursal no te pertenece');
@@ -154,30 +150,26 @@ class AdminController extends Controller
                 }
             }
 
-            // Activar la sucursal si está inactiva (solo si es nueva o si admin la activa)
             if (!$sucursal->activa) {
                 $sucursal->activa = true;
                 $sucursal->save();
             }
 
-            // Verificar si el email ya está registrado
             $existeUsuario = Usuario::where('email', $solicitud->email)->exists();
             if ($existeUsuario) {
                 return ApiResponse::error('El email ya está registrado como usuario', 422);
             }
 
-            // Crear el usuario vendedor
             $vendedor = Usuario::create([
                 'nombre_completo' => $solicitud->nombre_completo,
                 'email' => $solicitud->email,
-                'password' => $solicitud->password, // Ya está hasheado
+                'password' => $solicitud->password,
                 'rol' => 'vendedor',
                 'sucursal_id' => $sucursalId,
                 'activo' => true,
                 'created_at' => now()
             ]);
 
-            // Actualizar estado de la solicitud
             DB::table('solicitudes_vendedores')
                 ->where('id', $solicitudId)
                 ->update([
@@ -187,7 +179,6 @@ class AdminController extends Controller
                     'comentarios' => $request->comentarios
                 ]);
 
-            // Obtener información actualizada de la sucursal
             $sucursalInfo = Sucursal::find($sucursalId);
 
             return ApiResponse::success([
@@ -215,7 +206,6 @@ class AdminController extends Controller
 
             $user = $request->user();
 
-            // Obtener la solicitud antes de rechazarla
             $solicitud = DB::table('solicitudes_vendedores')
                 ->where('id', $solicitudId)
                 ->where('estado', 'pendiente')
@@ -226,7 +216,6 @@ class AdminController extends Controller
                 return ApiResponse::notFound('Solicitud no encontrada o ya procesada');
             }
 
-            // Si es gerente, verificar permisos
             if ($user->rol === 'gerente') {
                 if ($solicitud->tipo_sucursal === 'existente') {
                     $sucursal = Sucursal::find($solicitud->sucursal_sugerida_id);
@@ -238,7 +227,6 @@ class AdminController extends Controller
                 }
             }
 
-            // Si era nueva sucursal y está inactiva, eliminarla
             if ($solicitud->tipo_sucursal === 'nueva' && $solicitud->sucursal_sugerida_id) {
 
                 $sucursal = Sucursal::find($solicitud->sucursal_sugerida_id);
@@ -254,7 +242,6 @@ class AdminController extends Controller
                 }
             }
 
-            // Actualizar estado de la solicitud
             DB::table('solicitudes_vendedores')
                 ->where('id', $solicitudId)
                 ->update([
@@ -288,7 +275,6 @@ class AdminController extends Controller
         try {
             $query = Sucursal::query();
 
-            // Filtros
             if ($request->has('activa')) {
                 $query->where('activa', $request->boolean('activa'));
             }
@@ -308,7 +294,6 @@ class AdminController extends Controller
 
             $sucursales = $query->orderBy('nombre')->paginate(20);
 
-            // Agregar conteo de vendedores por sucursal
             foreach ($sucursales as $sucursal) {
                 $sucursal->cantidad_vendedores = Usuario::where('sucursal_id', $sucursal->id)
                     ->where('rol', 'vendedor')
@@ -413,7 +398,6 @@ class AdminController extends Controller
             $query = Usuario::where('rol', 'vendedor')
                 ->with('sucursal');
 
-            // Filtros
             if ($request->has('activo')) {
                 $query->where('activo', $request->boolean('activo'));
             }

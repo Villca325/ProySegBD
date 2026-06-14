@@ -34,7 +34,6 @@ class AuthController extends Controller
                 'activo' => true
             ]);
 
-            // Generar token
             $token = $usuario->createToken('auth_token', ['cliente'])->plainTextToken;
 
             return ApiResponse::success([
@@ -51,10 +50,6 @@ class AuthController extends Controller
      * Solicitud de registro de vendedor (requiere aprobación)
      * El vendedor debe elegir: crear nueva sucursal O unirse a una existente
      */
-    /**
- * Solicitud de registro de vendedor (requiere aprobación)
- * El vendedor debe elegir: crear nueva sucursal O unirse a una existente
- */
 public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
 {
     try {
@@ -63,7 +58,6 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
         $mensajeSucursal = '';
         
         if ($request->tipo_sucursal === 'existente') {
-            // Unirse a sucursal existente (debe estar activa)
             $sucursalExistenteId = $request->sucursal_existente_id;
             $sucursal = Sucursal::find($sucursalExistenteId);
             
@@ -77,13 +71,12 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
             
             $mensajeSucursal = "Se te asignará a la sucursal '{$sucursal->nombre}' en {$sucursal->ciudad}";
         } else {
-            // Crear nueva sucursal (se crea INACTIVA)
             $sucursal = Sucursal::create([
                 'nombre' => $request->sucursal_nombre,
                 'ciudad' => $request->sucursal_ciudad,
                 'direccion' => $request->sucursal_direccion,
                 'telefono' => $request->sucursal_telefono,
-                'activa' => false,  // La sucursal se crea inactiva
+                'activa' => false,
                 'created_at' => now()
             ]);
             
@@ -91,7 +84,6 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
             $mensajeSucursal = "Se creará la nueva sucursal '{$sucursal->nombre}' en {$sucursal->ciudad} (pendiente de activación por administrador)";
         }
         
-        // Verificar si ya existe una solicitud pendiente para este email
         $solicitudExistente = DB::table('solicitudes_vendedores')
             ->where('email', $request->email)
             ->where('estado', 'pendiente')
@@ -101,7 +93,6 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
             return ApiResponse::error('Ya tienes una solicitud pendiente. Espera a que sea revisada.', 422);
         }
         
-        // Insertar en tabla de solicitudes
         $solicitudId = DB::table('solicitudes_vendedores')->insertGetId([
             'nombre_completo' => $request->nombre_completo,
             'email' => $request->email,
@@ -138,7 +129,6 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
     public function login(LoginRequest $request)
     {
         try {
-            // Buscar usuario por email
             $usuario = Usuario::whereEmail($request->email)
                 ->where('activo', true)
                 ->first();
@@ -147,26 +137,15 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
                 return ApiResponse::error('Usuario o contraseña incorrectos', 401);
             }
 
-            // if (!$usuario || !Hash::check($request->password, $usuario->password)) {
-            //     return ApiResponse::error('Credenciales inválidas o usuario inactivo', 401);
-            // }
-            // Verificar la contraseña
             if (!Hash::check($request->password, $usuario->password)) {
                 return ApiResponse::error('Usuario o contraseña incorrectos', 401);
             }
 
-            // Verificar si el usuario está activo
-            if (!$usuario->activo) {
-                return ApiResponse::error('Tu cuenta está desactivada. Contacta al administrador.', 401);
-            }
-
-            // Inyectar contexto de sesión (¡CRÍTICO para FGAC/RLS!)
+            // Inyectar contexto de sesión para RLS (Row Level Security)
             DatabaseContextService::injectContext($usuario);
 
-            // Eliminar tokens anteriores
             $usuario->tokens()->delete();
 
-            // Crear nuevo token con habilidad según rol
             $abilities = [$usuario->rol];
             $token = $usuario->createToken('auth_token', $abilities)->plainTextToken;
 
@@ -193,10 +172,9 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
     public function logout(Request $request)
     {
         try {
-            // Limpiar contexto de sesión en BD (¡CRÍTICO para evitar fugas!)
+            // Limpiar contexto de sesión en BD para RLS (Row Level Security)
             DatabaseContextService::clearContext();
 
-            // Revocar token actual
             $request->user()->currentAccessToken()->delete();
 
             return ApiResponse::success(null, 'Sesión cerrada exitosamente');
@@ -212,8 +190,6 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
     {
         try {
             $user = $request->user();
-
-            // Obtener contexto actual de BD
             $context = DatabaseContextService::getCurrentContext();
 
             return ApiResponse::success([
@@ -252,17 +228,12 @@ public function solicitarRegistroVendedor(RegistroVendedorRequest $request)
         try {
             $user = $request->user();
             
-            // Verificar que la contraseña actual sea correcta
             if (!Hash::check($request->current_password, $user->password)) {
                 return ApiResponse::error('La contraseña actual es incorrecta', 422);
             }
             
-            // Actualizar la contraseña
             $user->password = $request->new_password;
             $user->save();
-            
-            // Opcional: Revocar todos los tokens excepto el actual
-            // $user->tokens()->where('id', '!=', $user->currentAccessToken()->id)->delete();
             
             return ApiResponse::success(null, 'Contraseña actualizada exitosamente');
             

@@ -19,10 +19,8 @@ class ProductoController extends Controller
     public function index(Request $request)
     {
         try {
-            // Usar la vista que aplica RLS automáticamente
             $query = DB::table('vista_productos');
 
-            // Filtros opcionales
             if ($request->has('categoria_id')) {
                 $query->where('categoria_id', $request->categoria_id);
             }
@@ -56,8 +54,6 @@ class ProductoController extends Controller
     public function show($id)
     {
         try {
-            // Log::info(DB::select('select @app_user_role'));
-
             $producto = DB::table('vista_productos')
                 ->where('id', $id)
                 ->first();
@@ -79,7 +75,6 @@ class ProductoController extends Controller
     public function store(ProductoRequest $request)
     {
         try {
-            // Usar procedimiento almacenado que valida permisos
             $result = DB::select(
                 'CALL sp_insertar_producto(?, ?, ?, ?, ?)',
                 [
@@ -95,7 +90,6 @@ class ProductoController extends Controller
 
             $productoId = $result[0]->producto_id ?? null;
 
-            // Obtener el producto creado
             $producto = DB::table('vista_productos')->where('id', $productoId)->first();
 
             return ApiResponse::success([
@@ -128,7 +122,6 @@ class ProductoController extends Controller
                 ]
             );
 
-            // Obtener el producto actualizado
             $producto = DB::table('vista_productos')->where('id', $id)->first();
 
             return ApiResponse::success($producto, 'Producto actualizado exitosamente');
@@ -177,7 +170,7 @@ class ProductoController extends Controller
                 ->where('vendedor_id', $vendedorId)
                 ->orderBy('id', 'desc')
                 ->paginate(20);
-            // Log::info();
+                
             return ApiResponse::success($productos, 'Productos del vendedor obtenidos exitosamente');
 
         } catch (\Exception $e) {

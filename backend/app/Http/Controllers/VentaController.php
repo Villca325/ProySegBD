@@ -23,7 +23,6 @@ class VentaController extends Controller
             $ventas = [];
             $query = null;
 
-            // Según el rol, usar la vista correspondiente
             switch ($user->rol) {
                 case 'cliente':
                     $query = DB::table('vista_mis_compras');
@@ -39,7 +38,6 @@ class VentaController extends Controller
 
                 case 'admin':
                 case 'auditor':
-                    // Admin y auditor ven todas las ventas con relaciones
                     $ventas = Venta::with(['cliente', 'detalles.producto'])
                         ->orderBy('fecha', 'desc')
                         ->paginate(20);
@@ -50,7 +48,6 @@ class VentaController extends Controller
                     return ApiResponse::forbidden('Rol no autorizado para ver ventas');
                     }
                     
-            // Aplicar filtros adicionales
             if ($request->has('estado')) {
                 $query->where('estado', $request->estado);
             }
@@ -138,7 +135,6 @@ class VentaController extends Controller
             $ventaId = $result[0]->venta_id ?? null;
             $total = $result[0]->total ?? 0;
 
-            // Obtener la venta creada
             $venta = DB::table('vista_mis_compras')->where('id', $ventaId)->first();
 
             return ApiResponse::success([
