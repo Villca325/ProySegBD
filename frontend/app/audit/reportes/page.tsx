@@ -38,10 +38,11 @@ export default function AuditReportesPage() {
                 fecha_hasta: fechas.fecha_fin,
                 per_page: 1000
             });
-            
+
             if (response.success) {
                 const logs = response.data.data;
-                
+
+                // Procesar datos para estadísticas
                 const operacionesPorDia = logs.reduce((acc: any, log: any) => {
                     const fecha = format(new Date(log.fecha), 'yyyy-MM-dd');
                     if (!acc[fecha]) {
@@ -51,7 +52,7 @@ export default function AuditReportesPage() {
                     acc[fecha].total++;
                     return acc;
                 }, {});
-                
+
                 const operacionesPorTabla = logs.reduce((acc: any, log: any) => {
                     if (!acc[log.tabla_afectada]) {
                         acc[log.tabla_afectada] = { name: log.tabla_afectada, value: 0 };
@@ -59,7 +60,7 @@ export default function AuditReportesPage() {
                     acc[log.tabla_afectada].value++;
                     return acc;
                 }, {});
-                
+
                 const operacionesPorTipo = logs.reduce((acc: any, log: any) => {
                     if (!acc[log.operacion]) {
                         acc[log.operacion] = { name: log.operacion, value: 0, color: COLORS[log.operacion] };
@@ -67,7 +68,7 @@ export default function AuditReportesPage() {
                     acc[log.operacion].value++;
                     return acc;
                 }, {});
-                
+
                 const usuariosTop = logs.reduce((acc: any, log: any) => {
                     const nombre = log.usuario_nombre || `Usuario ${log.usuario_real_id}`;
                     if (!acc[nombre]) {
@@ -76,9 +77,9 @@ export default function AuditReportesPage() {
                     acc[nombre].value++;
                     return acc;
                 }, {});
-                
+
                 const totalEventos = logs.length;
-                
+
                 setReporte({
                     logs,
                     estadisticas: {
@@ -90,7 +91,7 @@ export default function AuditReportesPage() {
                     },
                     periodo: fechas
                 });
-                
+
                 toast.success('Reporte generado exitosamente');
             }
         } catch (error) {
@@ -103,7 +104,7 @@ export default function AuditReportesPage() {
 
     const exportarReporte = () => {
         if (!reporte) return;
-        
+
         const csvContent = [
             ['ID', 'Fecha', 'Tabla', 'Operación', 'Usuario', 'IP', 'Datos Antes', 'Datos Después'],
             ...reporte.logs.map((log: any) => [
@@ -117,7 +118,7 @@ export default function AuditReportesPage() {
                 JSON.stringify(log.datos_despues || {})
             ])
         ].map(row => row.join(',')).join('\n');
-        
+
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -208,22 +209,20 @@ export default function AuditReportesPage() {
                         <div className="flex justify-end space-x-2">
                             <button
                                 onClick={() => setViewType('resumen')}
-                                className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                                    viewType === 'resumen'
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${viewType === 'resumen'
                                         ? 'bg-blue-600 text-white'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
+                                    }`}
                             >
                                 <BarChart3 className="h-4 w-4" />
                                 <span>Resumen</span>
                             </button>
                             <button
                                 onClick={() => setViewType('detalle')}
-                                className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                                    viewType === 'detalle'
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${viewType === 'detalle'
                                         ? 'bg-blue-600 text-white'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
+                                    }`}
                             >
                                 <Table className="h-4 w-4" />
                                 <span>Detalle</span>
@@ -304,7 +303,7 @@ export default function AuditReportesPage() {
                                                 {reporte.estadisticas.por_dia.map((dia: any, idx: number) => {
                                                     const maxTotal = getMaxValue(reporte.estadisticas.por_dia, 'total');
                                                     const widthPercentage = (dia.total / maxTotal) * 100;
-                                                    
+
                                                     return (
                                                         <tr key={idx} className="hover:bg-gray-50">
                                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -367,9 +366,9 @@ export default function AuditReportesPage() {
                                                         <span className="text-sm font-medium text-gray-700 capitalize">{tabla.name}</span>
                                                         <div className="flex items-center space-x-2 flex-1 ml-4">
                                                             <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                                                <div 
-                                                                    className="h-2 rounded-full" 
-                                                                    style={{ 
+                                                                <div
+                                                                    className="h-2 rounded-full"
+                                                                    style={{
                                                                         width: `${calcularPorcentaje(tabla.value, reporte.estadisticas.total_eventos)}%`,
                                                                         backgroundColor: COLORS[tabla.name] || COLORS.default
                                                                     }}
@@ -400,9 +399,9 @@ export default function AuditReportesPage() {
                                                         <span className="text-sm font-medium text-gray-700">{op.name}</span>
                                                         <div className="flex items-center space-x-2 flex-1 ml-4">
                                                             <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                                                <div 
-                                                                    className="h-2 rounded-full" 
-                                                                    style={{ 
+                                                                <div
+                                                                    className="h-2 rounded-full"
+                                                                    style={{
                                                                         width: `${calcularPorcentaje(op.value, reporte.estadisticas.total_eventos)}%`,
                                                                         backgroundColor: op.color
                                                                     }}
@@ -431,8 +430,8 @@ export default function AuditReportesPage() {
                                                     <span className="text-sm text-gray-700">{usuario.name}</span>
                                                     <div className="flex items-center space-x-2 flex-1 ml-4">
                                                         <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                                            <div 
-                                                                className="bg-purple-600 h-2 rounded-full" 
+                                                            <div
+                                                                className="bg-purple-600 h-2 rounded-full"
                                                                 style={{ width: `${calcularPorcentaje(usuario.value, reporte.estadisticas.total_eventos)}%` }}
                                                             />
                                                         </div>
@@ -477,11 +476,10 @@ export default function AuditReportesPage() {
                                                         <span className="text-sm font-medium text-gray-900">{log.tabla_afectada}</span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                                                            log.operacion === 'INSERT' ? 'bg-green-100 text-green-800' :
-                                                            log.operacion === 'UPDATE' ? 'bg-blue-100 text-blue-800' :
-                                                            'bg-red-100 text-red-800'
-                                                        }`}>
+                                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${log.operacion === 'INSERT' ? 'bg-green-100 text-green-800' :
+                                                                log.operacion === 'UPDATE' ? 'bg-blue-100 text-blue-800' :
+                                                                    'bg-red-100 text-red-800'
+                                                            }`}>
                                                             {log.operacion}
                                                         </span>
                                                     </td>

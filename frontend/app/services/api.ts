@@ -27,6 +27,7 @@ class ApiService {
             }
         );
 
+        // Interceptor para manejar errores
         this.api.interceptors.response.use(
             (response) => response,
             (error) => {
@@ -68,7 +69,7 @@ class ApiService {
     }
 
     async login(email: string, password: string) {
-                const response = await this.api.post('/auth/login', { email, password });
+        const response = await this.api.post('/auth/login', { email, password });
         if (response.data.success) {
             const { token, user } = response.data.data;
             Cookies.set('auth_token', token, { expires: 7 });
@@ -291,14 +292,14 @@ class ApiService {
         tabla?: string;
         operacion?: string;
     }) {
-        const response = await this.api.get('/audit/exportar', { 
+        const response = await this.api.get('/audit/exportar', {
             params,
-            responseType: 'blob' 
+            responseType: 'blob'
         });
         return response.data;
     }
 
-     
+
 }
 
 export const api = new ApiService();

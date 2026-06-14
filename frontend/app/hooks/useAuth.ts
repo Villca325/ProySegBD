@@ -48,7 +48,8 @@ export const useAuth = () => {
                 setUser(user);
                 setToken(token);
                 toast.success('Bienvenido ' + user.nombre_completo);
-               
+
+                // Redirigir según rol
                 if (user.rol === 'admin') {
                     router.push('/admin/dashboard');
                 } else if (user.rol === 'vendedor') {

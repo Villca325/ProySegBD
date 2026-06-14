@@ -6,14 +6,14 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/hooks/useAuth';
 import { api } from '@/app/services/api';
 import { Usuario, Sucursal } from '@/app/types';
-import { 
-    User, 
-    Mail, 
-    Building, 
-    Shield, 
-    Calendar, 
-    Edit, 
-    Save, 
+import {
+    User,
+    Mail,
+    Building,
+    Shield,
+    Calendar,
+    Edit,
+    Save,
     X,
     Camera,
     Key,
@@ -39,22 +39,22 @@ export default function PerfilPage() {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
-    
+
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    
+
     const [editForm, setEditForm] = useState({
         nombre_completo: '',
         email: ''
     });
-    
+
     const [passwordForm, setPasswordForm] = useState({
         current_password: '',
         new_password: '',
         new_password_confirmation: ''
     });
-    
+
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState(false);
 
@@ -72,7 +72,8 @@ export default function PerfilPage() {
                     nombre_completo: response.data.user.nombre_completo,
                     email: response.data.user.email
                 });
-                
+
+                // Obtener información de la sucursal si el usuario tiene una
                 if (response.data.user.sucursal_id) {
                     try {
                         const sucursalesResponse = await api.getAdminSucursales();
@@ -99,7 +100,7 @@ export default function PerfilPage() {
         e.preventDefault();
         setSubmitting(true);
         setErrors({});
-        
+
         const newErrors: Record<string, string> = {};
         if (!editForm.nombre_completo.trim()) {
             newErrors.nombre_completo = 'El nombre completo es requerido';
@@ -109,13 +110,13 @@ export default function PerfilPage() {
         } else if (!/\S+@\S+\.\S+/.test(editForm.email)) {
             newErrors.email = 'Correo electrónico inválido';
         }
-        
+
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             setSubmitting(false);
             return;
         }
-        
+
         try {
             if (perfil) {
                 setPerfil({
@@ -137,7 +138,7 @@ export default function PerfilPage() {
         e.preventDefault();
         setSubmitting(true);
         setErrors({});
-        
+
         try {
             const response = await api.cambiarPassword(passwordForm);
             if (response.success) {
@@ -155,7 +156,7 @@ export default function PerfilPage() {
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || 'Error al cambiar contraseña';
             const errorErrors = error.response?.data?.errors;
-            
+
             if (errorErrors) {
                 setErrors(errorErrors);
             } else {
@@ -274,7 +275,7 @@ export default function PerfilPage() {
                                     </span>
                                 </div>
                             </div>
-                            
+
                             <div className="p-6 border-t border-gray-200">
                                 <div className="space-y-3">
                                     <div className="flex items-center text-gray-600">
@@ -347,9 +348,8 @@ export default function PerfilPage() {
                                         )}
                                         <div>
                                             <p className="text-sm text-gray-500">Estado</p>
-                                            <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                                sucursal.activa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                            }`}>
+                                            <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${sucursal.activa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                }`}>
                                                 {sucursal.activa ? 'Activa' : 'Inactiva'}
                                             </span>
                                         </div>
@@ -375,7 +375,7 @@ export default function PerfilPage() {
                                     </button>
                                 )}
                             </div>
-                            
+
                             <div className="p-6">
                                 {isEditing ? (
                                     <form onSubmit={handleUpdatePerfil} className="space-y-4">
@@ -387,15 +387,14 @@ export default function PerfilPage() {
                                                 type="text"
                                                 value={editForm.nombre_completo}
                                                 onChange={(e) => setEditForm({ ...editForm, nombre_completo: e.target.value })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                                    errors.nombre_completo ? 'border-red-500' : 'border-gray-300'
-                                                }`}
+                                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.nombre_completo ? 'border-red-500' : 'border-gray-300'
+                                                    }`}
                                             />
                                             {errors.nombre_completo && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.nombre_completo}</p>
                                             )}
                                         </div>
-                                        
+
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Correo Electrónico
@@ -404,15 +403,14 @@ export default function PerfilPage() {
                                                 type="email"
                                                 value={editForm.email}
                                                 onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                                    errors.email ? 'border-red-500' : 'border-gray-300'
-                                                }`}
+                                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                                                    }`}
                                             />
                                             {errors.email && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                                             )}
                                         </div>
-                                        
+
                                         <div className="flex justify-end space-x-3 pt-4">
                                             <button
                                                 type="button"
@@ -486,7 +484,7 @@ export default function PerfilPage() {
                                     </button>
                                 )}
                             </div>
-                            
+
                             <div className="p-6">
                                 {showChangePassword ? (
                                     <form onSubmit={handleChangePassword} className="space-y-4">
@@ -500,9 +498,8 @@ export default function PerfilPage() {
                                                     type={showCurrentPassword ? 'text' : 'password'}
                                                     value={passwordForm.current_password}
                                                     onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                                                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                                        errors.current_password ? 'border-red-500' : 'border-gray-300'
-                                                    }`}
+                                                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.current_password ? 'border-red-500' : 'border-gray-300'
+                                                        }`}
                                                     placeholder="Ingresa tu contraseña actual"
                                                 />
                                                 <button
@@ -517,7 +514,7 @@ export default function PerfilPage() {
                                                 <p className="mt-1 text-sm text-red-600">{errors.current_password}</p>
                                             )}
                                         </div>
-                                        
+
                                         {/* Nueva Contraseña */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -528,9 +525,8 @@ export default function PerfilPage() {
                                                     type={showNewPassword ? 'text' : 'password'}
                                                     value={passwordForm.new_password}
                                                     onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                                                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                                        errors.new_password ? 'border-red-500' : 'border-gray-300'
-                                                    }`}
+                                                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.new_password ? 'border-red-500' : 'border-gray-300'
+                                                        }`}
                                                     placeholder="Ingresa tu nueva contraseña (mínimo 6 caracteres)"
                                                 />
                                                 <button
@@ -545,7 +541,7 @@ export default function PerfilPage() {
                                                 <p className="mt-1 text-sm text-red-600">{errors.new_password}</p>
                                             )}
                                         </div>
-                                        
+
                                         {/* Confirmar Nueva Contraseña */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -556,9 +552,8 @@ export default function PerfilPage() {
                                                     type={showConfirmPassword ? 'text' : 'password'}
                                                     value={passwordForm.new_password_confirmation}
                                                     onChange={(e) => setPasswordForm({ ...passwordForm, new_password_confirmation: e.target.value })}
-                                                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                                        errors.new_password_confirmation ? 'border-red-500' : 'border-gray-300'
-                                                    }`}
+                                                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.new_password_confirmation ? 'border-red-500' : 'border-gray-300'
+                                                        }`}
                                                     placeholder="Confirma tu nueva contraseña"
                                                 />
                                                 <button
@@ -573,7 +568,7 @@ export default function PerfilPage() {
                                                 <p className="mt-1 text-sm text-red-600">{errors.new_password_confirmation}</p>
                                             )}
                                         </div>
-                                        
+
                                         {/* Requisitos de contraseña */}
                                         <div className="bg-blue-50 p-3 rounded-lg">
                                             <p className="text-xs text-blue-800 font-medium mb-1">Requisitos de la contraseña:</p>
@@ -582,7 +577,7 @@ export default function PerfilPage() {
                                                 <li>• Puede incluir letras, números y caracteres especiales</li>
                                             </ul>
                                         </div>
-                                        
+
                                         <div className="flex justify-end space-x-3 pt-4">
                                             <button
                                                 type="button"

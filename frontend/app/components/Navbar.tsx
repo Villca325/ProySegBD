@@ -42,6 +42,7 @@ export function Navbar() {
     } else {
       items.push({ href: "/productos", label: "Productos", icon: Package });
 
+      // Dashboard según rol
       if (hasRole(["vendedor", "gerente", "admin"])) {
         if (hasRole(["admin"])) {
           items.push({
@@ -64,6 +65,7 @@ export function Navbar() {
         }
       }
 
+      // Solicitudes - solo admin y gerente
       if (hasRole(["admin", "gerente"])) {
         items.push({
           href: "/admin/solicitudes",
@@ -72,6 +74,7 @@ export function Navbar() {
         });
       }
 
+      // Sucursales - solo admin
       if (hasRole(["admin"])) {
         items.push({
           href: "/admin/sucursales",
@@ -80,6 +83,7 @@ export function Navbar() {
         });
       }
 
+      // Vendedores - solo admin
       if (hasRole(["admin"])) {
         items.push({
           href: "/admin/vendedores",
@@ -88,6 +92,7 @@ export function Navbar() {
         });
       }
 
+      // Ventas/Mis Compras según rol
       if (hasRole(["cliente"])) {
         items.push({
           href: "/ventas",
@@ -104,6 +109,7 @@ export function Navbar() {
         });
       }
 
+      // Auditoría - solo auditor y admin (menú desplegable)
       if (hasRole(["auditor", "admin"])) {
       }
     }
