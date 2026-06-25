@@ -2,26 +2,15 @@
 CREATE DATABASE IF NOT EXISTS auditoria_remota;
 USE auditoria_remota;
 
--- Crear definición del servidor remoto (SIN la contraseña en la definición)
--- La contraseña se maneja mediante el archivo de configuración
 CREATE SERVER IF NOT EXISTS ecommerce_principal
 FOREIGN DATA WRAPPER mysql
 OPTIONS (
-    HOST '172.17.0.1',  -- IP del servidor principal
+    HOST '172.17.0.1',  
     PORT 3306,
     DATABASE 'ecommerce_seguro',
     USER 'auditor_federado_ssl'
 );
 
--- # Crear archivo de configuración en el servidor del auditor
--- # /etc/mysql/conf.d/auditor_federated.cnf
-
--- [client]
--- password=ClaveSegura123!
-
--- # Restringir permisos del archivo
--- chmod 600 /etc/mysql/conf.d/auditor_federated.cnf
--- chown mysql:mysql /etc/mysql/conf.d/auditor_federated.cnf
 
 
 -- Tabla federada: audit_logs
