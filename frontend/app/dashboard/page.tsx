@@ -57,7 +57,7 @@ export default function VendedorDashboardPage() {
         },
         {
             title: 'Total Facturado',
-            value: `$${parseFloat(estadisticas?.total_facturado)?.toFixed(2) || '0'}`,
+            value: `$${isNaN(parseFloat(estadisticas?.total_facturado)) ? 0 : parseFloat(estadisticas?.total_facturado)?.toFixed(2) }`,
             icon: TrendingUp,
             color: 'bg-purple-500',
             href: '/ventas'
